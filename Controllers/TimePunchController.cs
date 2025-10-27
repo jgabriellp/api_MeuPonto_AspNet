@@ -71,11 +71,11 @@ namespace MeuPonto.Controllers
         public async Task<IActionResult> UpdateTimePunchAsync(long id, [FromBody] TimePunchRequestDto timePunch)
         {
             var updatedTimePunch = await _timePunchService.UpdateAsync(id, timePunch);
-            if (updatedTimePunch == null)
+            if (updatedTimePunch == false)
             {
                 return NotFound("Or time punch or User or time punch Company doesn't exist");
             }
-            return Ok(updatedTimePunch);
+            return Ok();
         }
 
         [HttpDelete("{id}")]

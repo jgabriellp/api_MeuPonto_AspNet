@@ -58,7 +58,7 @@ namespace MeuPonto.Services.Service
             return MapToResponse(appUser);
         }
 
-        public async Task<UserResponseDto> CreateAppUserAsync(UserRequestDto user)
+        public async Task<UserResponseDto?> CreateAppUserAsync(UserRequestDto user)
         {
             if (await _appUserRepository.GetByEmailAsync(user.Email) != null || await _companyRepository.GetByIdAsync(user.CompanyId) == null)
             {

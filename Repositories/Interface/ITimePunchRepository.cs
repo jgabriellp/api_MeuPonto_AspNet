@@ -9,7 +9,7 @@ namespace MeuPonto.Repositories.Interface
         Task<IEnumerable<TimePunch>> GetAllByUserIdAsync(long userId);
         Task<TimePunch?> GetByIdAsync(long id);
         Task<TimePunch> CreateAsync(TimePunch timePunch);
-        Task<TimePunch?> UpdateAsync(TimePunch timePunch);
+        Task<bool> UpdateAsync(TimePunch timePunch);
         Task<bool> DeleteAsync(long id);
     }
 }

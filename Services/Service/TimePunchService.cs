@@ -8,11 +8,12 @@ namespace MeuPonto.Services.Service
     public class TimePunchService : ITimePunchService
     {
         private readonly ITimePunchRepository _timePunchRepository;
-        private readonly IUserRepository _userRepository;
+        private readonly IAppUserService _appUserService;
 
-        public TimePunchService(ITimePunchRepository timePunchRepository)
+        public TimePunchService(ITimePunchRepository timePunchRepository, IAppUserService appUserService)
         {
             _timePunchRepository = timePunchRepository;
+            _appUserService = appUserService;
         }
 
         public async Task<IEnumerable<TimePunch>> GetAllAsync()
@@ -53,7 +54,7 @@ namespace MeuPonto.Services.Service
 
         public async Task<TimePunch> CreateAsync(TimePunchRequestDto timePunch)
         {
-            var timePunchUser = await _userRepository.GetByIdAsync(timePunch.UserId);
+            var timePunchUser = await _appUserService.GetAppUserByIdAsync(timePunch.UserId);
             var timePunchCompany = await _timePunchRepository.GetAllByCompanyIdAsync(timePunch.CompanyId);
             
             if (timePunchUser == null || timePunchCompany == null)
@@ -71,18 +72,18 @@ namespace MeuPonto.Services.Service
                 CompanyId = timePunch.CompanyId
             };
             
-            return timePunchModel;
+            return await _timePunchRepository.CreateAsync(timePunchModel);
         }
 
-        public async Task<TimePunch?> UpdateAsync(long id, TimePunchRequestDto timePunch)
+        public async Task<bool> UpdateAsync(long id, TimePunchRequestDto timePunch)
         {
-            var timePunchUser = await _userRepository.GetByIdAsync(timePunch.UserId);
+            var timePunchUser = await _appUserService.GetAppUserByIdAsync(timePunch.UserId);
             var timePunchCompany = await _timePunchRepository.GetAllByCompanyIdAsync(timePunch.CompanyId);
             var timePunchToUpdate = await _timePunchRepository.GetByIdAsync(id);
 
             if (timePunchUser == null || timePunchCompany == null || timePunchToUpdate == null)
             {
-                return null;
+                return false;
             }
 
             var timePunchModel = new TimePunch
@@ -96,7 +97,7 @@ namespace MeuPonto.Services.Service
                 CompanyId = timePunch.CompanyId
             };
 
-            return timePunchModel;
+            return await _timePunchRepository.UpdateAsync(timePunchModel);
         }
 
         public async Task<bool> DeleteAsync(long id)

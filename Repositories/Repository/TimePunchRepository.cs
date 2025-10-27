@@ -69,7 +69,7 @@ namespace MeuPonto.Repositories.Repository
             }
         }
 
-        public async Task<TimePunch?> UpdateAsync(TimePunch timePunch)
+        public async Task<bool> UpdateAsync(TimePunch timePunch)
         {
             const string query = @"
                 UPDATE TimePunch
@@ -84,7 +84,7 @@ namespace MeuPonto.Repositories.Repository
             using (var connection = _connection.CreateConnection())
             {
                 var affectedRows = await connection.ExecuteAsync(query, timePunch);
-                return affectedRows > 0 ? timePunch : null;
+                return affectedRows > 0;
             }
         }
 

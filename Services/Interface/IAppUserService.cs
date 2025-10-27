@@ -9,7 +9,7 @@ namespace MeuPonto.Services.Interface
         Task<IEnumerable<UserResponseDto>> GetAllAppUsersAsync();
         Task<UserResponseDto> GetAppUserByIdAsync(long id);
         Task<UserResponseDto> GetAppUserByEmailAsync(string email);
-        Task<UserResponseDto> CreateAppUserAsync(UserRequestDto appUser);
+        Task<UserResponseDto?> CreateAppUserAsync(UserRequestDto appUser);
         Task<bool> UpdateAppUserAsync(long id, UserRequestDto appUser);
         Task<bool> DeleteAppUserAsync(long id);
     }
