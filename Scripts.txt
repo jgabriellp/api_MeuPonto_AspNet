@@ -1,0 +1,36 @@
+CREATE DATABASE MeuPontoDB;
+
+CREATE TABLE Company (
+    Id BIGINT PRIMARY KEY IDENTITY(1,1),
+    Nome NVARCHAR(255) NOT NULL,
+    Cnpj NVARCHAR(18) UNIQUE NOT NULL, 
+    Email NVARCHAR(255)
+    -- PlanoId (removido)
+    -- ... outras colunas
+);
+
+CREATE TABLE [dbo].[AppUser] ( -- Renomeado para AppUser para evitar a palavra reservada 'User'
+    Id BIGINT PRIMARY KEY IDENTITY(1,1),
+    Email NVARCHAR(255) NOT NULL UNIQUE, 
+    [Password] NVARCHAR(MAX) NOT NULL, -- Uso de colchetes para 'Password' (boa prática)
+    [Name] NVARCHAR(100) NOT NULL,
+    LastName NVARCHAR(100) NOT NULL, -- Sobrenome -> LastName
+    Phone NVARCHAR(20),
+    [Role] NVARCHAR(50) NOT NULL,
+    CompanyId BIGINT NOT NULL, 
+    
+    CONSTRAINT FK_AppUser_Company FOREIGN KEY (CompanyId) REFERENCES Company(Id)
+);
+
+CREATE TABLE Ponto (
+    Id BIGINT PRIMARY KEY IDENTITY(1,1),
+    Horario DATETIME2 NOT NULL, -- DATETIME2 é melhor para precisão em SQL Server
+    Tipo NVARCHAR(10) NOT NULL, -- Ex: 'ENTRADA' ou 'SAIDA'
+    Localizacao NVARCHAR(MAX),  -- Corresponde a LONGTEXT
+    FotoUrl NVARCHAR(MAX),      -- Corresponde a LONGTEXT
+    UsuarioId BIGINT NOT NULL,
+    EmpresaId BIGINT NOT NULL,
+    
+    CONSTRAINT FK_Ponto_Usuario FOREIGN KEY (UsuarioId) REFERENCES Usuario(Id),
+    CONSTRAINT FK_Ponto_Empresa FOREIGN KEY (EmpresaId) REFERENCES Empresa(Id)
+);
