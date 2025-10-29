@@ -83,7 +83,7 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "Bearer"
                 }
             },
-            new string[] {} // Permite todas as escopos (scopes)
+            new string[] {}
         }
     });
 });

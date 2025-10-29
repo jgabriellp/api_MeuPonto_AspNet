@@ -2,10 +2,12 @@
 using MeuPonto.Model.Dto.RequestDto;
 using MeuPonto.Repositories.Interface;
 using MeuPonto.Services.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MeuPonto.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class CompanyController : ControllerBase
