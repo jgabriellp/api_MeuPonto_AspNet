@@ -4,7 +4,9 @@ using MeuPonto.Repositories.Repository;
 using MeuPonto.Services.Interface;
 using MeuPonto.Services.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,48 +26,67 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITimePunchService, TimePunchService>();
 builder.Services.AddScoped<ITimePunchRepository, TimePunchRepository>();
 
-//// Adicionar o serviço que GERA o token
-//builder.Services.AddScoped<ITokenService, TokenService>();
+var jwtKey = builder.Configuration["Jwt:Key"];
+var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
 
-//// --- 2. Adicionar o Middleware de Autenticação JWT Bearer ---
+builder.Services.AddAuthentication(options =>
+{
+    // Define o JWT Bearer como o esquema padrão para Autenticar e Desafiar
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
 
-//// Lendo configurações do JWT
-//var jwtSettings = builder.Configuration.GetSection("Jwt");
-//// A chave é convertida em bytes para uso criptográfico
-//var key = Encoding.ASCII.GetBytes(jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not configured in appsettings.json."));
+        ValidateIssuer = false,
+        //ValidIssuer = jwtSettings["Issuer"],
 
-//builder.Services.AddAuthentication(options =>
-//{
-//    // Define o JWT Bearer como o esquema padrão de autenticação
-//    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-//    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-//})
-//.AddJwtBearer(options =>
-//{
-//    // Apenas para desenvolvimento (mude para TRUE em produção)
-//    options.RequireHttpsMetadata = false;
-//    options.SaveToken = true;
-//    options.TokenValidationParameters = new TokenValidationParameters
-//    {
-//        ValidateIssuerSigningKey = true,
-//        // Chave secreta que valida a assinatura
-//        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateAudience = false,
+        //ValidAudience = jwtSettings["Audience"],
 
-//        ValidateIssuer = true,
-//        ValidIssuer = jwtSettings["Issuer"], // "MeuPontoAPI"
-
-//        ValidateAudience = true,
-//        ValidAudience = jwtSettings["Audience"], // "MeuPontoApp"
-
-//        ValidateLifetime = true,
-//        ClockSkew = TimeSpan.Zero // Sem tolerância de tempo
-//    };
-//});
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+});
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    // 1. Define o esquema de segurança (Bearer JWT)
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Insira o token JWT no formato: Bearer SEU_TOKEN_AQUI",
+    });
+
+    // 2. Aplica o requisito de segurança globalmente (para o botão funcionar)
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {} // Permite todas as escopos (scopes)
+        }
+    });
+});
 
 var app = builder.Build();
 
@@ -78,6 +99,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

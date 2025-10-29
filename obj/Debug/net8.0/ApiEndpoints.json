@@ -106,6 +106,22 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "MeuPonto.Controllers.AppUserController",
+    "Method": "Login",
+    "RelativePath": "api/AppUser/Login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "loginRequestDto",
+        "Type": "MeuPonto.Model.Dto.RequestDto.LoginRequestDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "MeuPonto.Controllers.CompanyController",
     "Method": "GetAllCompaniesAsync",
     "RelativePath": "api/Company",

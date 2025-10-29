@@ -1,8 +1,13 @@
-﻿using MeuPonto.Model;
+﻿
+using MeuPonto.Model;
 using MeuPonto.Model.Dto.RequestDto;
 using MeuPonto.Model.Dto.ResponseDto;
 using MeuPonto.Repositories.Interface;
 using MeuPonto.Services.Interface;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace MeuPonto.Services.Service
 {
@@ -10,10 +15,13 @@ namespace MeuPonto.Services.Service
     {
         private readonly IUserRepository _appUserRepository;
         private readonly ICompanyRepository _companyRepository;
+        private readonly IConfiguration _configuration;
 
-        public AppUserService(IUserRepository appUserRepository)
+        public AppUserService(IUserRepository appUserRepository, ICompanyRepository companyRepository, IConfiguration configuration)
         {
             _appUserRepository = appUserRepository;
+            _companyRepository = companyRepository;
+            _configuration = configuration;
         }
 
         private UserResponseDto MapToResponse(AppUser user)
@@ -28,6 +36,40 @@ namespace MeuPonto.Services.Service
                 Email = user.Email,
                 Phone = user.Phone
             };
+        }
+
+        public AuthResponseDto Login(LoginRequestDto loginRequestDto)
+        {
+            var user = _appUserRepository.GetByEmailAsync(loginRequestDto.Email);
+            if (user == null || user.Result == null || !BCrypt.Net.BCrypt.Verify(loginRequestDto.Password, user.Result.Password))
+            {
+                return null;
+            }
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Email, user.Result.Email),
+                }),
+                Expires = DateTime.UtcNow.AddMinutes(60),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            string userToken = tokenHandler.WriteToken(token);
+
+            var userAccess = new AuthResponseDto
+            {
+                Id = user.Result.Id,
+                Name = user.Result.Name,
+                Email = user.Result.Email,
+                Role = user.Result.Role,
+                Token = userToken
+            };
+
+            return userAccess;
         }
 
         public async Task<IEnumerable<UserResponseDto>> GetAllAppUsersAsync()
@@ -65,6 +107,8 @@ namespace MeuPonto.Services.Service
                 return null;
             }
 
+            string hashedPassword = BCrypt.Net.BCrypt.HashPassword(user.Password);
+
             var newUser = new AppUser
             {
                 Name = user.Name,
@@ -72,7 +116,7 @@ namespace MeuPonto.Services.Service
                 CompanyId = user.CompanyId,
                 Role = user.Role,
                 Email = user.Email,
-                Password = user.Password,
+                Password = hashedPassword,
                 Phone = user.Phone
             };
 

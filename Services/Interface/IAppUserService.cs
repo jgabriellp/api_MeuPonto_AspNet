@@ -6,6 +6,7 @@ namespace MeuPonto.Services.Interface
 {
     public interface IAppUserService
     {
+        AuthResponseDto Login(LoginRequestDto loginRequestDto);
         Task<IEnumerable<UserResponseDto>> GetAllAppUsersAsync();
         Task<UserResponseDto> GetAppUserByIdAsync(long id);
         Task<UserResponseDto> GetAppUserByEmailAsync(string email);

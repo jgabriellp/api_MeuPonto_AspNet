@@ -81,3 +81,5 @@ C:\Users\Jogap\Projetos Asp.NET\MeuPonto\MeuPonto\obj\Debug\net8.0\MeuPonto.genr
 C:\Users\Jogap\Projetos Asp.NET\MeuPonto\MeuPonto\obj\Debug\net8.0\ref\MeuPonto.dll
 C:\Users\Jogap\Projetos Asp.NET\MeuPonto\MeuPonto\obj\Debug\net8.0\MeuPonto.sourcelink.json
 C:\Users\Jogap\Projetos Asp.NET\MeuPonto\MeuPonto\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\Jogap\Projetos Asp.NET\MeuPonto\MeuPonto\bin\Debug\net8.0\DevOne.Security.Cryptography.BCrypt.dll
+C:\Users\Jogap\Projetos Asp.NET\MeuPonto\MeuPonto\bin\Debug\net8.0\BCrypt.Net-Next.dll

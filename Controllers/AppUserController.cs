@@ -3,10 +3,13 @@ using MeuPonto.Model.Dto.RequestDto;
 using MeuPonto.Model.Dto.ResponseDto;
 using MeuPonto.Repositories.Interface;
 using MeuPonto.Services.Interface;
+using MeuPonto.Services.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MeuPonto.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class AppUserController : ControllerBase
@@ -16,6 +19,18 @@ namespace MeuPonto.Controllers
         public AppUserController(IAppUserService appUserService)
         {
             _appUserService = appUserService;
+        }
+
+        [HttpPost("Login")]
+        [AllowAnonymous]
+        public IActionResult Login([FromBody] LoginRequestDto loginRequestDto)
+        {
+            var userAccess = _appUserService.Login(loginRequestDto);
+            if (userAccess == null || userAccess.Token == string.Empty)
+            {
+                return BadRequest(new { message = "UserEmail or Password is incorrect" });
+            }
+            return Ok(userAccess);
         }
 
         [HttpGet]
